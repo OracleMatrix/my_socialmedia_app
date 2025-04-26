@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import '../controllers/profile_controller.dart';
@@ -10,8 +12,10 @@ class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
   @override
   Widget build(BuildContext context) {
+    final arguments = Get.arguments;
+    final userId = arguments['userId'];
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await controller.getUserData();
+      await controller.getUserData(userId);
     });
     return Scaffold(
       appBar: AppBar(title: Text('Profile view'), centerTitle: true),
@@ -24,6 +28,14 @@ class ProfileView extends GetView<ProfileController> {
             ),
           );
         }
+        controller.isFollowing.value =
+            controller.userData.value.following!
+                .map((e) => e.followerId)
+                .where(
+                  (element) => element == GetStorage().read(Constants.idKey),
+                )
+                .isNotEmpty;
+        final currentUserId = GetStorage().read(Constants.idKey);
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -69,7 +81,39 @@ class ProfileView extends GetView<ProfileController> {
                 ],
               ),
               SizedBox(height: 20),
-              UpdateProfileSheet(controller: controller),
+              if (userId == currentUserId)
+                UpdateProfileSheet(controller: controller, userId: userId),
+              if (userId != currentUserId)
+                Obx(
+                  () => MaterialButton(
+                    onPressed: () async {
+                      if (controller.isFollowing.value) {
+                        final result = await controller.unFollowUser(
+                          currentUserId,
+                          userId,
+                        );
+                        if (result) {
+                          controller.isFollowing.value = false;
+                        }
+                      } else {
+                        final result = await controller.followUser(
+                          currentUserId,
+                          userId,
+                        );
+                        if (result) {
+                          controller.isFollowing.value = true;
+                        }
+                      }
+                    },
+                    color:
+                        controller.isFollowing.value ? Colors.red : Colors.blue,
+                    child: Text(
+                      controller.isFollowing.value ? 'Unfollow' : 'Follow',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+
               Divider(),
               _buildPostsGrid(),
             ],
@@ -278,9 +322,14 @@ class ProfileView extends GetView<ProfileController> {
 }
 
 class UpdateProfileSheet extends StatelessWidget {
-  const UpdateProfileSheet({super.key, required this.controller});
+  const UpdateProfileSheet({
+    super.key,
+    required this.controller,
+    required this.userId,
+  });
 
   final ProfileController controller;
+  final int userId;
 
   @override
   Widget build(BuildContext context) {
@@ -429,7 +478,7 @@ class UpdateProfileSheet extends StatelessWidget {
                               );
                             }
                             Get.back();
-                            await controller.updateUserData();
+                            await controller.updateUserData(userId);
                           },
                           child: Text('Update'),
                         ),
