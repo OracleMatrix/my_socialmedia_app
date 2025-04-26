@@ -12,8 +12,8 @@ class UserDataModel {
   DateTime? createdAt;
   DateTime? updatedAt;
   List<Post>? posts;
-  List<Follower>? follower;
-  List<dynamic>? following;
+  List<Follow>? follower;
+  List<Follow>? following;
 
   UserDataModel({
     this.id,
@@ -41,13 +41,15 @@ class UserDataModel {
     follower:
         json["follower"] == null
             ? []
-            : List<Follower>.from(
-              json["follower"]!.map((x) => Follower.fromJson(x)),
+            : List<Follow>.from(
+              json["follower"]!.map((x) => Follow.fromJson(x)),
             ),
     following:
         json["following"] == null
             ? []
-            : List<dynamic>.from(json["following"]!.map((x) => x)),
+            : List<Follow>.from(
+              json["following"]!.map((x) => Follow.fromJson(x)),
+            ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -63,28 +65,32 @@ class UserDataModel {
             ? []
             : List<dynamic>.from(follower!.map((x) => x.toJson())),
     "following":
-        following == null ? [] : List<dynamic>.from(following!.map((x) => x)),
+        following == null
+            ? []
+            : List<dynamic>.from(following!.map((x) => x.toJson())),
   };
 }
 
-class Follower {
+class Follow {
   int? id;
   int? followerId;
   int? followingId;
   DateTime? createdAt;
   DateTime? updatedAt;
-  Following? following;
+  Follower? following;
+  Follower? follower;
 
-  Follower({
+  Follow({
     this.id,
     this.followerId,
     this.followingId,
     this.createdAt,
     this.updatedAt,
     this.following,
+    this.follower,
   });
 
-  factory Follower.fromJson(Map<String, dynamic> json) => Follower(
+  factory Follow.fromJson(Map<String, dynamic> json) => Follow(
     id: json["id"],
     followerId: json["followerId"],
     followingId: json["followingId"],
@@ -93,9 +99,9 @@ class Follower {
     updatedAt:
         json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
     following:
-        json["following"] == null
-            ? null
-            : Following.fromJson(json["following"]),
+        json["following"] == null ? null : Follower.fromJson(json["following"]),
+    follower:
+        json["follower"] == null ? null : Follower.fromJson(json["follower"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -105,19 +111,20 @@ class Follower {
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
     "following": following?.toJson(),
+    "follower": follower?.toJson(),
   };
 }
 
-class Following {
+class Follower {
   int? id;
   String? name;
   String? email;
   DateTime? createdAt;
   DateTime? updatedAt;
 
-  Following({this.id, this.name, this.email, this.createdAt, this.updatedAt});
+  Follower({this.id, this.name, this.email, this.createdAt, this.updatedAt});
 
-  factory Following.fromJson(Map<String, dynamic> json) => Following(
+  factory Follower.fromJson(Map<String, dynamic> json) => Follower(
     id: json["id"],
     name: json["name"],
     email: json["email"],
@@ -143,8 +150,8 @@ class Post {
   int? userId;
   DateTime? createdAt;
   DateTime? updatedAt;
-  List<dynamic>? comments;
-  List<dynamic>? likes;
+  List<Comment>? comments;
+  List<Comment>? likes;
 
   Post({
     this.id,
@@ -169,11 +176,15 @@ class Post {
     comments:
         json["comments"] == null
             ? []
-            : List<dynamic>.from(json["comments"]!.map((x) => x)),
+            : List<Comment>.from(
+              json["comments"]!.map((x) => Comment.fromJson(x)),
+            ),
     likes:
         json["likes"] == null
             ? []
-            : List<dynamic>.from(json["likes"]!.map((x) => x)),
+            : List<Comment>.from(
+              json["likes"]!.map((x) => Comment.fromJson(x)),
+            ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -184,7 +195,52 @@ class Post {
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
     "comments":
-        comments == null ? [] : List<dynamic>.from(comments!.map((x) => x)),
-    "likes": likes == null ? [] : List<dynamic>.from(likes!.map((x) => x)),
+        comments == null
+            ? []
+            : List<dynamic>.from(comments!.map((x) => x.toJson())),
+    "likes":
+        likes == null ? [] : List<dynamic>.from(likes!.map((x) => x.toJson())),
+  };
+}
+
+class Comment {
+  int? id;
+  int? userId;
+  int? postId;
+  String? content;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  Follower? user;
+
+  Comment({
+    this.id,
+    this.userId,
+    this.postId,
+    this.content,
+    this.createdAt,
+    this.updatedAt,
+    this.user,
+  });
+
+  factory Comment.fromJson(Map<String, dynamic> json) => Comment(
+    id: json["id"],
+    userId: json["userId"],
+    postId: json["postId"],
+    content: json["content"],
+    createdAt:
+        json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
+    updatedAt:
+        json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
+    user: json["user"] == null ? null : Follower.fromJson(json["user"]),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "userId": userId,
+    "postId": postId,
+    "content": content,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "user": user?.toJson(),
   };
 }
