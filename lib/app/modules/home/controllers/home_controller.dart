@@ -3,11 +3,15 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:my_socialmedia_app/app/modules/home/Models/get_all_posts_model.dart';
+import 'package:my_socialmedia_app/app/modules/home/Models/get_all_users_model.dart';
+import 'package:my_socialmedia_app/app/modules/home/Models/get_user_by_email_model.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/comment_on_post_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/create_post_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/delete_post_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/dislike_post_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/get_all_posts_provider.dart';
+import 'package:my_socialmedia_app/app/modules/home/providers/get_all_users_provider.dart';
+import 'package:my_socialmedia_app/app/modules/home/providers/get_user_by_email_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/like_post_provider.dart';
 
 class HomeController extends GetxController {
@@ -64,6 +68,20 @@ class HomeController extends GetxController {
 
   set dislikePostProvider(var value) => _dislikePostProvider = value;
 
+  var _getAllUsersProvider = GetAllUsersProvider();
+  get getAllUsersProvider => _getAllUsersProvider;
+
+  set getAllUsersProvider(var value) => _getAllUsersProvider = value;
+
+  var allUsersModel = <GetAllUsersModel>[].obs;
+
+  var _getUserByEmailProvider = GetUserByEmailProvider();
+  get getUserByEmailProvider => _getUserByEmailProvider;
+
+  set getUserByEmailProvider(var value) => _getUserByEmailProvider = value;
+
+  var userDataByEmail = <GetUserByEmailModel>[].obs;
+
   Future getAllPosts() async {
     try {
       _isLoading.value = true;
@@ -99,6 +117,37 @@ class HomeController extends GetxController {
         icon: Icon(Icons.error, color: Colors.white),
       );
     }
+  }
+
+  Future getAllUsers() async {
+    try {
+      _isLoading.value = true;
+      final response = await _getAllUsersProvider.getAllUsers();
+      if (response != null) {
+        allUsersModel.value = response;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future getUserByEmail(String email) async {
+    try {
+      final response = await _getUserByEmailProvider.getUserByEmail(email);
+      if (response != null) {
+        userDataByEmail.value = response;
+      }
+    } catch (e) {
+      return e.toString();
+    } finally {}
   }
 
   Future sendPost() async {
