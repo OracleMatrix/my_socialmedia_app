@@ -44,6 +44,7 @@ dependencies:
   share_plus: ^11.0.0
   responsive_builder: ^0.7.1
   random_avatar: ^0.0.8
+  searchfield: ^1.2.7
 
 dev_dependencies:
   flutter_test:
