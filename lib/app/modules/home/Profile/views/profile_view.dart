@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
+import 'package:random_avatar/random_avatar.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import '../controllers/profile_controller.dart';
@@ -41,7 +42,7 @@ class ProfileView extends GetView<ProfileController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 20),
-              CircleAvatar(radius: 60, child: Icon(Icons.person, size: 60)),
+              CircleAvatar(radius: 60, child: RandomAvatar('saytoonz')),
               SizedBox(height: 10),
               Text(
                 controller.userData.value.name ?? 'No Name',
@@ -266,7 +267,7 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(child: Icon(Icons.person)),
+                  leading: CircleAvatar(child: RandomAvatar('saytoonz')),
                   title: Text(follower.following?.name ?? 'No Name'),
                   subtitle: Text(follower.following?.email ?? 'No Email'),
                 ),
@@ -307,7 +308,7 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(child: Icon(Icons.person)),
+                  leading: CircleAvatar(child: RandomAvatar('saytoonz')),
                   title: Text(followings.follower?.name ?? 'No Name'),
                   subtitle: Text(followings.follower?.email ?? 'No Email'),
                 ),

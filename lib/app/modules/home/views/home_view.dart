@@ -8,6 +8,7 @@ import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:my_socialmedia_app/app/modules/home/Models/get_all_posts_model.dart';
 import 'package:my_socialmedia_app/app/routes/app_pages.dart';
 import 'package:pull_down_button/pull_down_button.dart';
+import 'package:random_avatar/random_avatar.dart';
 import 'package:share_plus/share_plus.dart';
 import '../controllers/home_controller.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -55,6 +56,13 @@ class HomeView extends GetView<HomeController> {
             icon: Icon(Icons.logout_rounded),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: Size(Get.width, Get.height * 0.08),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SearchBar(hintText: 'Search users...'),
+          ),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.getAllPosts(),
@@ -179,16 +187,7 @@ class HomeView extends GetView<HomeController> {
           child: CircleAvatar(
             radius: 20,
             backgroundColor: Colors.grey[300],
-            child: Text(
-              user?.name != null
-                  ? user!.name.toString().split('.').last[0]
-                  : '?',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.black,
-              ),
-            ),
+            child: RandomAvatar('saytoonz'),
           ),
         ),
         const SizedBox(width: 10),
