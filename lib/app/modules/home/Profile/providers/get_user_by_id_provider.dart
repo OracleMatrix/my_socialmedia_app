@@ -4,10 +4,10 @@ import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/Models/user_data_model.dart';
 
 class GetUserByIdProvider extends GetConnect {
-  Future<UserDataModel?> getUserData() async {
+  Future<UserDataModel?> getUserData(int userId) async {
     try {
       final response = await get(
-        '${Constants.baseUrl}/api/users/getUserById/${await GetStorage().read(Constants.idKey)}',
+        '${Constants.baseUrl}/api/users/getUserById/$userId',
         headers: {'auth': await GetStorage().read(Constants.tokenKey)},
       );
       if (response.body != null) {
