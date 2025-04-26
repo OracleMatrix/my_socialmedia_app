@@ -29,7 +29,10 @@ class HomeView extends GetView<HomeController> {
         actions: [
           IconButton(
             onPressed: () {
-              Get.toNamed(Routes.PROFILE);
+              Get.toNamed(
+                Routes.PROFILE,
+                arguments: {'userId': GetStorage().read(Constants.idKey)},
+              );
             },
             icon: const Icon(Icons.person),
           ),
@@ -169,24 +172,36 @@ class HomeView extends GetView<HomeController> {
   Row userInfoSection(User? user, Post post) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.grey[300],
-          child: Text(
-            user?.name != null ? user!.name.toString().split('.').last[0] : '?',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors.black,
+        GestureDetector(
+          onTap: () {
+            Get.toNamed(Routes.PROFILE, arguments: {'userId': user?.id});
+          },
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.grey[300],
+            child: Text(
+              user?.name != null
+                  ? user!.name.toString().split('.').last[0]
+                  : '?',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.black,
+              ),
             ),
           ),
         ),
         const SizedBox(width: 10),
-        Text(
-          user?.name != null
-              ? user!.name.toString().split('.').last
-              : 'Unknown',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        GestureDetector(
+          onTap: () {
+            Get.toNamed(Routes.PROFILE, arguments: {'userId': user?.id});
+          },
+          child: Text(
+            user?.name != null
+                ? user!.name.toString().split('.').last
+                : 'Unknown',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
         const Spacer(),
         Text(
