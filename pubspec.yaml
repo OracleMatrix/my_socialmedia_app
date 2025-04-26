@@ -43,6 +43,7 @@ dependencies:
   pull_down_button: ^0.10.2
   share_plus: ^11.0.0
   responsive_builder: ^0.7.1
+  random_avatar: ^0.0.8
 
 dev_dependencies:
   flutter_test:
