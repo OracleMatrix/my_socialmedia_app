@@ -25,8 +25,6 @@ class HomeView extends GetView<HomeController> {
       appBar: AppBar(
         title: const Text('Home'),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 1,
         actions: [
           IconButton(
@@ -62,6 +60,18 @@ class HomeView extends GetView<HomeController> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: SearchField(
+              searchInputDecoration: SearchInputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+              ),
+              suggestionsDecoration: SuggestionDecoration(
+                border: Border.all(color: Colors.grey.shade800),
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.grey.shade700,
+              ),
               onSearchTextChanged: (value) {
                 if (value.length >= 3) {
                   controller.getUserByEmail(value);
