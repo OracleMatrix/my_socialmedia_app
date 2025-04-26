@@ -1,27 +1,27 @@
-// ignore_for_file: unnecessary_null_checks
-
 import 'dart:convert';
 
-GetAllPosts getAllPostsFromJson(String str) =>
-    GetAllPosts.fromJson(json.decode(str));
+GetAllPostsModel getAllPostsModelFromJson(String str) =>
+    GetAllPostsModel.fromJson(json.decode(str));
 
-String getAllPostsToJson(GetAllPosts data) => json.encode(data.toJson());
+String getAllPostsModelToJson(GetAllPostsModel data) =>
+    json.encode(data.toJson());
 
-class GetAllPosts {
+class GetAllPostsModel {
   String? message;
   int? totalPosts;
   List<Post>? posts;
 
-  GetAllPosts({this.message, this.totalPosts, this.posts});
+  GetAllPostsModel({this.message, this.totalPosts, this.posts});
 
-  factory GetAllPosts.fromJson(Map<String, dynamic> json) => GetAllPosts(
-    message: json["message"],
-    totalPosts: json["totalPosts"],
-    posts:
-        json["posts"] == null
-            ? []
-            : List<Post>.from(json["posts"].map((x) => Post.fromJson(x))),
-  );
+  factory GetAllPostsModel.fromJson(Map<String, dynamic> json) =>
+      GetAllPostsModel(
+        message: json["message"],
+        totalPosts: json["totalPosts"],
+        posts:
+            json["posts"] == null
+                ? []
+                : List<Post>.from(json["posts"]!.map((x) => Post.fromJson(x))),
+      );
 
   Map<String, dynamic> toJson() => {
     "message": message,
@@ -68,12 +68,12 @@ class Post {
         json["comments"] == null
             ? []
             : List<Comment>.from(
-              json["comments"].map((x) => Comment.fromJson(x)),
+              json["comments"]!.map((x) => Comment.fromJson(x)),
             ),
     likes:
         json["likes"] == null
             ? []
-            : List<Like>.from(json["likes"].map((x) => Like.fromJson(x))),
+            : List<Like>.from(json["likes"]!.map((x) => Like.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -113,6 +113,86 @@ class Comment {
   };
 }
 
+class User {
+  int? id;
+  String? name;
+  String? email;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  List<Following>? following;
+
+  User({
+    this.id,
+    this.name,
+    this.email,
+    this.createdAt,
+    this.updatedAt,
+    this.following,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json["id"],
+    name: json["name"],
+    email: json["email"],
+    createdAt:
+        json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
+    updatedAt:
+        json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
+    following:
+        json["following"] == null
+            ? []
+            : List<Following>.from(
+              json["following"]!.map((x) => Following.fromJson(x)),
+            ),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "email": email,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "following":
+        following == null
+            ? []
+            : List<dynamic>.from(following!.map((x) => x.toJson())),
+  };
+}
+
+class Following {
+  int? id;
+  int? followerId;
+  int? followingId;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+
+  Following({
+    this.id,
+    this.followerId,
+    this.followingId,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory Following.fromJson(Map<String, dynamic> json) => Following(
+    id: json["id"],
+    followerId: json["followerId"],
+    followingId: json["followingId"],
+    createdAt:
+        json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
+    updatedAt:
+        json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "followerId": followerId,
+    "followingId": followingId,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+  };
+}
+
 class Like {
   int? id;
   User? user;
@@ -125,17 +205,4 @@ class Like {
   );
 
   Map<String, dynamic> toJson() => {"id": id, "user": user?.toJson()};
-}
-
-class User {
-  int? id;
-  String? name;
-  String? email;
-
-  User({this.id, this.name, this.email});
-
-  factory User.fromJson(Map<String, dynamic> json) =>
-      User(id: json["id"], name: json["name"], email: json["email"]);
-
-  Map<String, dynamic> toJson() => {"id": id, "name": name, "email": email};
 }
