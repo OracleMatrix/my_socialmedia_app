@@ -19,6 +19,11 @@ class ProfileView extends GetView<ProfileController> {
       await controller.getUserData(userId);
     });
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        onPressed: () => controller.getUserData(userId),
+        child: Icon(Icons.refresh),
+      ),
       appBar: AppBar(title: Text('Profile view'), centerTitle: true),
       body: Obx(() {
         if (controller.isLoading) {
