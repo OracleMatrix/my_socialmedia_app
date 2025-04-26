@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/Models/user_data_model.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/delete_user_provider.dart';
+import 'package:my_socialmedia_app/app/modules/home/Profile/providers/follow_user_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/get_user_by_id_provider.dart';
+import 'package:my_socialmedia_app/app/modules/home/Profile/providers/un_follow_user_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/update_user_data_provider.dart';
 import 'package:my_socialmedia_app/app/routes/app_pages.dart';
 
@@ -35,10 +37,22 @@ class ProfileController extends GetxController {
 
   set updateUserProvider(var value) => _updateUserProvider = value;
 
-  Future getUserData() async {
+  var _followUserProvider = FollowUserProvider();
+  get followUserProvider => _followUserProvider;
+
+  set followUserProvider(var value) => _followUserProvider = value;
+
+  var _unFollowUserProvider = UnFollowUserProvider();
+  get unFollowUserProvider => _unFollowUserProvider;
+
+  set unFollowUserProvider(var value) => _unFollowUserProvider = value;
+
+  var isFollowing = false.obs;
+
+  Future getUserData(int userId) async {
     try {
       _isLoading.value = true;
-      var response = await _getUserDataProvider.getUserData();
+      var response = await _getUserDataProvider.getUserData(userId);
       if (response != null) {
         userData.value = response;
       }
@@ -55,7 +69,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future updateUserData() async {
+  Future updateUserData(int userId) async {
     try {
       _isLoading.value = true;
       final data = {
@@ -72,7 +86,7 @@ class ProfileController extends GetxController {
           colorText: Colors.white,
           icon: Icon(Icons.check, color: Colors.white),
         );
-        getUserData();
+        getUserData(userId);
       }
     } catch (e) {
       Get.snackbar(
@@ -112,5 +126,67 @@ class ProfileController extends GetxController {
     } finally {
       _isLoading.value = false;
     }
+  }
+
+  Future<bool> followUser(int followerId, int followingId) async {
+    try {
+      _isLoading.value = true;
+      final data = {'followerId': followerId, 'followingId': followingId};
+      var response = await _followUserProvider.followUser(data);
+      if (response != null) {
+        Get.snackbar(
+          'Success',
+          'User followed successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          icon: Icon(Icons.check, color: Colors.white),
+        );
+        isFollowing.value = true;
+        return true;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> unFollowUser(int followerId, int followingId) async {
+    try {
+      _isLoading.value = true;
+      var response = await _unFollowUserProvider.unFollowUser(
+        followerId,
+        followingId,
+      );
+      if (response != null) {
+        Get.snackbar(
+          'Success',
+          'User unfollowed successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          icon: Icon(Icons.check, color: Colors.white),
+        );
+        isFollowing.value = false;
+        return true;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isLoading.value = false;
+    }
+    return false;
   }
 }
