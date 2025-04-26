@@ -13,15 +13,18 @@ class ProfileView extends GetView<ProfileController> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.getUserData();
     });
-    return Obx(() {
-      if (controller.isLoading) {
-        return Center(
-          child: LoadingAnimationWidget.beat(color: Colors.blue, size: 60),
-        );
-      }
-      return Scaffold(
-        appBar: AppBar(title: Text('Profile view'), centerTitle: true),
-        body: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(title: Text('Profile view'), centerTitle: true),
+      body: Obx(() {
+        if (controller.isLoading) {
+          return Center(
+            child: LoadingAnimationWidget.fourRotatingDots(
+              color: Colors.blue,
+              size: 60,
+            ),
+          );
+        }
+        return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -71,9 +74,9 @@ class ProfileView extends GetView<ProfileController> {
               _buildPostsGrid(),
             ],
           ),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 
   Widget _buildCountColumn(String label, int count) {
@@ -257,10 +260,15 @@ class ProfileView extends GetView<ProfileController> {
           itemCount: following.length,
           itemBuilder: (context, index) {
             var followings = following[index];
-            return ListTile(
-              leading: CircleAvatar(child: Icon(Icons.person)),
-              title: Text(followings.name ?? 'No Name'),
-              subtitle: Text(followings.email ?? 'No Email'),
+            return Column(
+              children: [
+                ListTile(
+                  leading: CircleAvatar(child: Icon(Icons.person)),
+                  title: Text(followings.follower?.name ?? 'No Name'),
+                  subtitle: Text(followings.follower?.email ?? 'No Email'),
+                ),
+                Divider(color: Colors.white),
+              ],
             );
           },
         ),
