@@ -9,6 +9,7 @@ import 'package:my_socialmedia_app/app/modules/home/Models/get_all_posts_model.d
 import 'package:my_socialmedia_app/app/routes/app_pages.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import 'package:random_avatar/random_avatar.dart';
+import 'package:searchfield/searchfield.dart';
 import 'package:share_plus/share_plus.dart';
 import '../controllers/home_controller.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -60,7 +61,30 @@ class HomeView extends GetView<HomeController> {
           preferredSize: Size(Get.width, Get.height * 0.08),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: SearchBar(hintText: 'Search users...'),
+            child: SearchField(
+              onSearchTextChanged: (value) {
+                if (value.length >= 3) {
+                  controller.getUserByEmail(value);
+                }
+                return controller.userDataByEmail
+                    .map(
+                      (element) =>
+                          SearchFieldListItem(element.email!, item: element),
+                    )
+                    .toList();
+              },
+              suggestions:
+                  controller.userDataByEmail
+                      .map((e) => SearchFieldListItem(e.email!, item: e))
+                      .toList(),
+              onSuggestionTap: (value) {
+                final user = value.item;
+                if (user != null && user.id != null) {
+                  Get.toNamed(Routes.PROFILE, arguments: {'userId': user.id});
+                }
+              },
+              hint: 'Search users...',
+            ),
           ),
         ),
       ),
