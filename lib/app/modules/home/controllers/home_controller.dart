@@ -26,7 +26,7 @@ class HomeController extends GetxController {
 
   set createPostProvider(var value) => _createPostProvider = value;
 
-  var postsData = GetAllPosts().obs;
+  var postsData = GetAllPostsModel().obs;
 
   var _titleController = TextEditingController().obs;
   var _contentController = TextEditingController().obs;
