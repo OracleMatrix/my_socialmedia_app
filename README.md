@@ -29,7 +29,7 @@ A modern, responsive social media application built with Flutter and Node.js, of
 
 - Node.js
 - Express.js
-- MongoDB
+- MYSQL
 - JWT Authentication
 - RESTful API Architecture
 
@@ -39,7 +39,7 @@ A modern, responsive social media application built with Flutter and Node.js, of
 
 - Flutter SDK (^3.7.2)
 - Node.js
-- MongoDB
+- MYSQL
 
 ### Frontend Setup
 
