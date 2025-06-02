@@ -1,6 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -8,11 +8,11 @@ import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:my_socialmedia_app/app/modules/home/Models/get_all_posts_model.dart';
 import 'package:my_socialmedia_app/app/routes/app_pages.dart';
 import 'package:pull_down_button/pull_down_button.dart';
-import 'package:random_avatar/random_avatar.dart';
 import 'package:searchfield/searchfield.dart';
 import 'package:share_plus/share_plus.dart';
-import '../controllers/home_controller.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
+import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -20,6 +20,11 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     controller.getAllPosts(); // Fetch posts on build
+    late String accessToken;
+    Future.delayed(
+      Duration(seconds: 1),
+      () async => accessToken = await GetStorage().read(Constants.tokenKey),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -31,7 +36,10 @@ class HomeView extends GetView<HomeController> {
             onPressed: () {
               Get.toNamed(
                 Routes.PROFILE,
-                arguments: {'userId': GetStorage().read(Constants.idKey)},
+                arguments: {
+                  'userId': GetStorage().read(Constants.idKey),
+                  'accessToken': accessToken,
+                },
               );
             },
             icon: const Icon(Icons.person),
@@ -90,7 +98,10 @@ class HomeView extends GetView<HomeController> {
               onSuggestionTap: (value) {
                 final user = value.item;
                 if (user != null && user.id != null) {
-                  Get.toNamed(Routes.PROFILE, arguments: {'userId': user.id});
+                  Get.toNamed(
+                    Routes.PROFILE,
+                    arguments: {'userId': user.id, 'accessToken': accessToken},
+                  );
                 }
               },
               hint: 'Search users...',
@@ -147,7 +158,7 @@ class HomeView extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // User info row
-                      userInfoSection(user, post),
+                      userInfoSection(user, post, accessToken),
                       const SizedBox(height: 12),
                       // Post title
                       if (post.title != null && post.title!.isNotEmpty)
@@ -174,6 +185,7 @@ class HomeView extends GetView<HomeController> {
                         post: post,
                         likesCount: likesCount,
                         commentsCount: commentsCount,
+                        accessToken: accessToken,
                       ),
                     ],
                   ),
@@ -211,27 +223,50 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Row userInfoSection(User? user, Post post) {
+  userInfoSection(User? user, Post post, String accessToken) {
     return Row(
       children: [
         GestureDetector(
           onTap: () {
-            Get.toNamed(Routes.PROFILE, arguments: {'userId': user?.id});
+            Get.toNamed(
+              Routes.PROFILE,
+              arguments: {'userId': user.id, 'accessToken': accessToken},
+            );
           },
           child: CircleAvatar(
             radius: 20,
             backgroundColor: Colors.grey[300],
-            child: RandomAvatar('saytoonz'),
+            child: CachedNetworkImage(
+              imageUrl:
+                  '${Constants.baseUrl}/api/users/download/profilePicture/${user!.id}',
+              httpHeaders: {'auth': accessToken},
+              progressIndicatorBuilder:
+                  (context, url, progress) => Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              errorWidget:
+                  (context, url, error) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.person, color: Colors.grey),
+                  ),
+            ),
           ),
         ),
         const SizedBox(width: 10),
         GestureDetector(
           onTap: () {
-            Get.toNamed(Routes.PROFILE, arguments: {'userId': user?.id});
+            Get.toNamed(
+              Routes.PROFILE,
+              arguments: {'userId': user.id, 'accessToken': accessToken},
+            );
           },
           child: Text(
-            user?.name != null
-                ? user!.name.toString().split('.').last
+            user.name != null
+                ? user.name.toString().split('.').last
                 : 'Unknown',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
@@ -308,6 +343,7 @@ class LikesAndCommentsSection extends StatelessWidget {
     required this.post,
     required this.likesCount,
     required this.commentsCount,
+    required this.accessToken,
   });
 
   final bool liked;
@@ -315,6 +351,7 @@ class LikesAndCommentsSection extends StatelessWidget {
   final Post post;
   final int likesCount;
   final int commentsCount;
+  final String accessToken;
 
   @override
   Widget build(BuildContext context) {
@@ -353,6 +390,7 @@ class LikesAndCommentsSection extends StatelessWidget {
           post: post,
           controller: controller,
           commentsCount: commentsCount,
+          accessToken: accessToken,
         ),
       ],
     );
@@ -365,11 +403,13 @@ class CommentsSection extends StatelessWidget {
     required this.post,
     required this.controller,
     required this.commentsCount,
+    required this.accessToken,
   });
 
   final Post post;
   final HomeController controller;
   final int commentsCount;
+  final String accessToken;
 
   @override
   Widget build(BuildContext context) {
@@ -426,14 +466,26 @@ class CommentsSection extends StatelessWidget {
                             ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: Colors.grey[300],
-                                child: Text(
-                                  commenterName.isNotEmpty
-                                      ? commenterName.split('.').last[0]
-                                      : '?',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
+                                child: CachedNetworkImage(
+                                  imageUrl:
+                                      '${Constants.baseUrl}/api/users/download/profilePicture/${comment.user!.id}',
+                                  httpHeaders: {'auth': accessToken},
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                  errorWidget:
+                                      (context, url, error) => Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 ),
                               ),
                               title: Text(
