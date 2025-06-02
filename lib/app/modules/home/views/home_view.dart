@@ -171,6 +171,34 @@ class HomeView extends GetView<HomeController> {
                         ),
                       if (post.title != null && post.title!.isNotEmpty)
                         const SizedBox(height: 8),
+                      if (post.postPicture != null)
+                        SizedBox(
+                          height: Get.height * 0.2,
+                          width: Get.width,
+                          child: CachedNetworkImage(
+                            imageUrl:
+                                '${Constants.baseUrl}/api/posts/${post.id}/picture',
+                            httpHeaders: {'auth': accessToken},
+                            progressIndicatorBuilder:
+                                (context, url, progress) => Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                ),
+                            errorWidget:
+                                (context, url, error) => Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                          ),
+                        ),
                       // Post content
                       if (post.content != null && post.content!.isNotEmpty)
                         Text(
@@ -233,27 +261,23 @@ class HomeView extends GetView<HomeController> {
               arguments: {'userId': user.id, 'accessToken': accessToken},
             );
           },
-          child: CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.grey[300],
-            child: CachedNetworkImage(
-              imageUrl:
-                  '${Constants.baseUrl}/api/users/download/profilePicture/${user!.id}',
-              httpHeaders: {'auth': accessToken},
-              progressIndicatorBuilder:
-                  (context, url, progress) => Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-              errorWidget:
-                  (context, url, error) => Padding(
+          child: CachedNetworkImage(
+            imageUrl:
+                '${Constants.baseUrl}/api/users/download/profilePicture/${user!.id}',
+            httpHeaders: {'auth': accessToken},
+            progressIndicatorBuilder:
+                (context, url, progress) => Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Icon(Icons.person, color: Colors.grey),
+                    child: CircularProgressIndicator(),
                   ),
-            ),
+                ),
+            errorWidget:
+                (context, url, error) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.person, color: Colors.grey),
+                ),
           ),
         ),
         const SizedBox(width: 10),
@@ -464,29 +488,26 @@ class CommentsSection extends StatelessWidget {
                         return Column(
                           children: [
                             ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.grey[300],
-                                child: CachedNetworkImage(
-                                  imageUrl:
-                                      '${Constants.baseUrl}/api/users/download/profilePicture/${comment.user!.id}',
-                                  httpHeaders: {'auth': accessToken},
-                                  progressIndicatorBuilder:
-                                      (context, url, progress) => Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      ),
-                                  errorWidget:
-                                      (context, url, error) => Padding(
+                              leading: CachedNetworkImage(
+                                imageUrl:
+                                    '${Constants.baseUrl}/api/users/download/profilePicture/${comment.user!.id}',
+                                httpHeaders: {'auth': accessToken},
+                                progressIndicatorBuilder:
+                                    (context, url, progress) => Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Icon(
-                                          Icons.person,
-                                          color: Colors.grey,
-                                        ),
+                                        child: CircularProgressIndicator(),
                                       ),
-                                ),
+                                    ),
+                                errorWidget:
+                                    (context, url, error) => Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                               ),
                               title: Text(
                                 commenterName,

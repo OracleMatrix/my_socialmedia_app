@@ -48,26 +48,23 @@ class ProfileView extends GetView<ProfileController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 20),
-              CircleAvatar(
-                radius: 60,
-                child: CachedNetworkImage(
-                  imageUrl:
-                      '${Constants.baseUrl}/api/users/download/profilePicture/${userId}',
-                  httpHeaders: {'auth': accessToken},
-                  progressIndicatorBuilder:
-                      (context, url, progress) => Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                  errorWidget:
-                      (context, url, error) => Padding(
+              CachedNetworkImage(
+                imageUrl:
+                    '${Constants.baseUrl}/api/users/download/profilePicture/${userId}',
+                httpHeaders: {'auth': accessToken},
+                progressIndicatorBuilder:
+                    (context, url, progress) => Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Icon(Icons.person, color: Colors.grey),
+                        child: CircularProgressIndicator(),
                       ),
-                ),
+                    ),
+                errorWidget:
+                    (context, url, error) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.person, color: Colors.grey),
+                    ),
               ),
               SizedBox(height: 10),
               Text(
@@ -293,26 +290,23 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(
-                    radius: 60,
-                    child: CachedNetworkImage(
-                      imageUrl:
-                          '${Constants.baseUrl}/api/users/download/profilePicture/${follower.id}',
-                      httpHeaders: {'auth': accessToken},
-                      progressIndicatorBuilder:
-                          (context, url, progress) => Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                      errorWidget:
-                          (context, url, error) => Padding(
+                  leading: CachedNetworkImage(
+                    imageUrl:
+                        '${Constants.baseUrl}/api/users/download/profilePicture/${follower.id}',
+                    httpHeaders: {'auth': accessToken},
+                    progressIndicatorBuilder:
+                        (context, url, progress) => Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Icon(Icons.person, color: Colors.grey),
+                            child: CircularProgressIndicator(),
                           ),
-                    ),
+                        ),
+                    errorWidget:
+                        (context, url, error) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.person, color: Colors.grey),
+                        ),
                   ),
                   title: Text(follower.following?.name ?? 'No Name'),
                   subtitle: Text(follower.following?.email ?? 'No Email'),
@@ -354,26 +348,23 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(
-                    radius: 60,
-                    child: CachedNetworkImage(
-                      imageUrl:
-                          '${Constants.baseUrl}/api/users/download/profilePicture/${followings.id}',
-                      httpHeaders: {'auth': accessToken},
-                      progressIndicatorBuilder:
-                          (context, url, progress) => Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                      errorWidget:
-                          (context, url, error) => Padding(
+                  leading: CachedNetworkImage(
+                    imageUrl:
+                        '${Constants.baseUrl}/api/users/download/profilePicture/${followings.id}',
+                    httpHeaders: {'auth': accessToken},
+                    progressIndicatorBuilder:
+                        (context, url, progress) => Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Icon(Icons.person, color: Colors.grey),
+                            child: CircularProgressIndicator(),
                           ),
-                    ),
+                        ),
+                    errorWidget:
+                        (context, url, error) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.person, color: Colors.grey),
+                        ),
                   ),
                   title: Text(followings.follower?.name ?? 'No Name'),
                   subtitle: Text(followings.follower?.email ?? 'No Email'),
