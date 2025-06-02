@@ -9,6 +9,7 @@ class UserDataModel {
   int? id;
   String? name;
   String? email;
+  String? profilePicture;
   DateTime? createdAt;
   DateTime? updatedAt;
   List<Post>? posts;
@@ -19,6 +20,7 @@ class UserDataModel {
     this.id,
     this.name,
     this.email,
+    this.profilePicture,
     this.createdAt,
     this.updatedAt,
     this.posts,
@@ -30,6 +32,7 @@ class UserDataModel {
     id: json["id"],
     name: json["name"],
     email: json["email"],
+    profilePicture: json["profilePicture"],
     createdAt:
         json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
     updatedAt:
@@ -37,18 +40,18 @@ class UserDataModel {
     posts:
         json["posts"] == null
             ? []
-            : List<Post>.from(json["posts"]!.map((x) => Post.fromJson(x))),
+            : List<Post>.from(json["posts"].map((x) => Post.fromJson(x))),
     follower:
         json["follower"] == null
             ? []
             : List<Follow>.from(
-              json["follower"]!.map((x) => Follow.fromJson(x)),
+              json["follower"].map((x) => Follow.fromJson(x)),
             ),
     following:
         json["following"] == null
             ? []
             : List<Follow>.from(
-              json["following"]!.map((x) => Follow.fromJson(x)),
+              json["following"].map((x) => Follow.fromJson(x)),
             ),
   );
 
@@ -56,6 +59,7 @@ class UserDataModel {
     "id": id,
     "name": name,
     "email": email,
+    "profilePicture": profilePicture,
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
     "posts":
@@ -147,6 +151,7 @@ class Post {
   int? id;
   String? title;
   String? content;
+  String? postPicture;
   int? userId;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -157,6 +162,7 @@ class Post {
     this.id,
     this.title,
     this.content,
+    this.postPicture,
     this.userId,
     this.createdAt,
     this.updatedAt,
@@ -168,6 +174,7 @@ class Post {
     id: json["id"],
     title: json["title"],
     content: json["content"],
+    postPicture: json["postPicture"],
     userId: json["userId"],
     createdAt:
         json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
@@ -177,20 +184,19 @@ class Post {
         json["comments"] == null
             ? []
             : List<Comment>.from(
-              json["comments"]!.map((x) => Comment.fromJson(x)),
+              json["comments"].map((x) => Comment.fromJson(x)),
             ),
     likes:
         json["likes"] == null
             ? []
-            : List<Comment>.from(
-              json["likes"]!.map((x) => Comment.fromJson(x)),
-            ),
+            : List<Comment>.from(json["likes"].map((x) => Comment.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "title": title,
     "content": content,
+    "postPicture": postPicture,
     "userId": userId,
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
