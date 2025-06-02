@@ -1,20 +1,21 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
-import 'package:random_avatar/random_avatar.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
+
   @override
   Widget build(BuildContext context) {
     final arguments = Get.arguments;
     final userId = arguments['userId'];
+    final accessToken = arguments['accessToken'];
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.getUserData(userId);
     });
@@ -47,7 +48,27 @@ class ProfileView extends GetView<ProfileController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 20),
-              CircleAvatar(radius: 60, child: RandomAvatar('saytoonz')),
+              CircleAvatar(
+                radius: 60,
+                child: CachedNetworkImage(
+                  imageUrl:
+                      '${Constants.baseUrl}/api/users/download/profilePicture/${userId}',
+                  httpHeaders: {'auth': accessToken},
+                  progressIndicatorBuilder:
+                      (context, url, progress) => Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                  errorWidget:
+                      (context, url, error) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.person, color: Colors.grey),
+                      ),
+                ),
+              ),
               SizedBox(height: 10),
               Text(
                 controller.userData.value.name ?? 'No Name',
@@ -68,7 +89,7 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      _showFollowersDetails(context);
+                      _showFollowersDetails(context, accessToken);
                     },
                     child: _buildCountColumn(
                       'Followers',
@@ -77,7 +98,7 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      _showFollowingDetails(context);
+                      _showFollowingDetails(context, accessToken);
                     },
                     child: _buildCountColumn(
                       'Following',
@@ -244,7 +265,7 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  void _showFollowersDetails(BuildContext context) {
+  void _showFollowersDetails(BuildContext context, String accessToken) {
     var followers = controller.userData.value.follower ?? [];
     if (followers.isEmpty) {
       Get.snackbar(
@@ -272,7 +293,27 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(child: RandomAvatar('saytoonz')),
+                  leading: CircleAvatar(
+                    radius: 60,
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          '${Constants.baseUrl}/api/users/download/profilePicture/${follower.id}',
+                      httpHeaders: {'auth': accessToken},
+                      progressIndicatorBuilder:
+                          (context, url, progress) => Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.person, color: Colors.grey),
+                          ),
+                    ),
+                  ),
                   title: Text(follower.following?.name ?? 'No Name'),
                   subtitle: Text(follower.following?.email ?? 'No Email'),
                 ),
@@ -285,7 +326,7 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  void _showFollowingDetails(BuildContext context) {
+  void _showFollowingDetails(BuildContext context, String accessToken) {
     var following = controller.userData.value.following ?? [];
     if (following.isEmpty) {
       Get.snackbar(
@@ -313,7 +354,27 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(child: RandomAvatar('saytoonz')),
+                  leading: CircleAvatar(
+                    radius: 60,
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          '${Constants.baseUrl}/api/users/download/profilePicture/${followings.id}',
+                      httpHeaders: {'auth': accessToken},
+                      progressIndicatorBuilder:
+                          (context, url, progress) => Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.person, color: Colors.grey),
+                          ),
+                    ),
+                  ),
                   title: Text(followings.follower?.name ?? 'No Name'),
                   subtitle: Text(followings.follower?.email ?? 'No Email'),
                 ),
