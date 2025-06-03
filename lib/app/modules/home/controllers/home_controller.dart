@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -13,22 +15,31 @@ import 'package:my_socialmedia_app/app/modules/home/providers/get_all_posts_prov
 import 'package:my_socialmedia_app/app/modules/home/providers/get_all_users_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/get_user_by_email_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/providers/like_post_provider.dart';
+import 'package:my_socialmedia_app/app/modules/home/providers/upload_post_image_provider.dart';
 
 class HomeController extends GetxController {
   var _isLoading = false.obs;
+
   get isLoading => _isLoading.value;
 
   set isLoading(var value) => _isLoading = value;
 
   var _getAllPostsProvider = GetAllPostsProvider();
+
   get getAllPostsProvider => _getAllPostsProvider;
 
   set getAllPostsProvider(var value) => _getAllPostsProvider = value;
 
   var _createPostProvider = CreatePostProvider();
+
   get createPostProvider => _createPostProvider;
 
   set createPostProvider(var value) => _createPostProvider = value;
+
+  final UploadPostImageProvider uploadPostImageProvider =
+      UploadPostImageProvider();
+
+  var selectedImage = Rxn<File>();
 
   var postsData = GetAllPostsModel().obs;
 
@@ -49,26 +60,31 @@ class HomeController extends GetxController {
   set contentController(value) => _contentController = value;
 
   var _deletePostProvider = DeletePostProvider();
+
   get deletePostProvider => _deletePostProvider;
 
   set deletePostProvider(var value) => _deletePostProvider = value;
 
   var _likePostProvider = LikePostProvider();
+
   get likePostProvider => _likePostProvider;
 
   set likePostProvider(var value) => _likePostProvider = value;
 
   var _commentOnPostProvider = CommentOnPostProvider();
+
   get commentOnPostProvider => _commentOnPostProvider;
 
   set commentOnPostProvider(var value) => _commentOnPostProvider = value;
 
   var _dislikePostProvider = DislikePostProvider();
+
   get dislikePostProvider => _dislikePostProvider;
 
   set dislikePostProvider(var value) => _dislikePostProvider = value;
 
   var _getAllUsersProvider = GetAllUsersProvider();
+
   get getAllUsersProvider => _getAllUsersProvider;
 
   set getAllUsersProvider(var value) => _getAllUsersProvider = value;
@@ -76,6 +92,7 @@ class HomeController extends GetxController {
   var allUsersModel = <GetAllUsersModel>[].obs;
 
   var _getUserByEmailProvider = GetUserByEmailProvider();
+
   get getUserByEmailProvider => _getUserByEmailProvider;
 
   set getUserByEmailProvider(var value) => _getUserByEmailProvider = value;
@@ -169,6 +186,27 @@ class HomeController extends GetxController {
         );
         _contentController.value.clear();
         _titleController.value.clear();
+        return data;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future uploadPostImage(int postId, File image) async {
+    try {
+      _isLoading.value = true;
+      final response = await uploadPostImageProvider.uploadImage(postId, image);
+      if (response != null) {
+        refreshPosts();
       }
     } catch (e) {
       Get.snackbar(
