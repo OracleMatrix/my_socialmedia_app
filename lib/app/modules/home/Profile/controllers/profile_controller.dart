@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/Models/user_data_model.dart';
+import 'package:my_socialmedia_app/app/modules/home/Profile/providers/add_profile_photo_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/delete_user_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/follow_user_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/get_user_by_id_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/un_follow_user_provider.dart';
 import 'package:my_socialmedia_app/app/modules/home/Profile/providers/update_user_data_provider.dart';
+import 'package:my_socialmedia_app/app/modules/home/providers/delete_post_provider.dart';
 import 'package:my_socialmedia_app/app/routes/app_pages.dart';
 
 class ProfileController extends GetxController {
@@ -16,11 +20,13 @@ class ProfileController extends GetxController {
   var isPasswordVisible = false.obs;
 
   var _isLoading = true.obs;
+
   get isLoading => _isLoading.value;
 
   set isLoading(var value) => _isLoading = value;
 
   var _getUserDataProvider = GetUserByIdProvider();
+
   get getUserDataProvider => _getUserDataProvider;
 
   set getUserDataProvider(var value) => _getUserDataProvider = value;
@@ -28,9 +34,11 @@ class ProfileController extends GetxController {
   var userData = UserDataModel().obs;
 
   var _updateUserProvider = UpdateUserDataProvider();
+
   get updateUserProvider => _updateUserProvider;
 
   var _deleteUserProvider = DeleteUserProvider();
+
   get deleteUserProvider => _deleteUserProvider;
 
   set deleteUserProvider(var value) => _deleteUserProvider = value;
@@ -38,14 +46,27 @@ class ProfileController extends GetxController {
   set updateUserProvider(var value) => _updateUserProvider = value;
 
   var _followUserProvider = FollowUserProvider();
+
   get followUserProvider => _followUserProvider;
 
   set followUserProvider(var value) => _followUserProvider = value;
 
   var _unFollowUserProvider = UnFollowUserProvider();
+
   get unFollowUserProvider => _unFollowUserProvider;
 
   set unFollowUserProvider(var value) => _unFollowUserProvider = value;
+
+  var _deletePostProvider = DeletePostProvider();
+
+  get deletePostProvider => _deletePostProvider;
+
+  set deletePostProvider(var value) => _deletePostProvider = value;
+
+  final AddProfilePhotoProvider _addProfilePhotoProvider =
+      AddProfilePhotoProvider();
+
+  var selectedImage = Rxn<File>();
 
   var isFollowing = false.obs;
 
@@ -87,6 +108,33 @@ class ProfileController extends GetxController {
           icon: Icon(Icons.check, color: Colors.white),
         );
         getUserData(userId);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future deletePost(int postId) async {
+    try {
+      _isLoading.value = true;
+      final data = await _deletePostProvider.deletePost(postId);
+      if (data != null) {
+        Get.snackbar(
+          'Successfull',
+          'Post deleted successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          icon: Icon(Icons.check_circle, color: Colors.white),
+        );
+        await getUserData(userData.value.id!);
       }
     } catch (e) {
       Get.snackbar(
@@ -188,5 +236,25 @@ class ProfileController extends GetxController {
       _isLoading.value = false;
     }
     return false;
+  }
+
+  Future addProfilePhoto(File image) async {
+    try {
+      _isLoading.value = true;
+      final response = await _addProfilePhotoProvider.addProfilePhoto(image);
+      if (response != null) {
+        getUserData(userData.value.id!);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isLoading.value = false;
+    }
   }
 }
