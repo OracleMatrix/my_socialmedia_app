@@ -266,8 +266,7 @@ class HomeView extends GetView<HomeController> {
           },
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: SizedBox(
-              height: Get.height * 0.035,
+            child: CircleAvatar(
               child: CachedNetworkImage(
                 imageUrl:
                     '${Constants.baseUrl}/api/users/download/profilePicture/${user!.id}',
@@ -494,8 +493,7 @@ class CommentsSection extends StatelessWidget {
                         return Column(
                           children: [
                             ListTile(
-                              leading: SizedBox(
-                                height: Get.height * 0.03,
+                              leading: CircleAvatar(
                                 child: CachedNetworkImage(
                                   imageUrl:
                                       '${Constants.baseUrl}/api/users/download/profilePicture/${comment.user!.id}',
