@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:my_socialmedia_app/app/modules/home/Models/get_all_posts_model.dart';
@@ -261,23 +264,26 @@ class HomeView extends GetView<HomeController> {
               arguments: {'userId': user.id, 'accessToken': accessToken},
             );
           },
-          child: CachedNetworkImage(
-            imageUrl:
-                '${Constants.baseUrl}/api/users/download/profilePicture/${user!.id}',
-            httpHeaders: {'auth': accessToken},
-            progressIndicatorBuilder:
-                (context, url, progress) => Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-            errorWidget:
-                (context, url, error) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.person, color: Colors.grey),
-                ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              height: Get.height * 0.035,
+              child: CachedNetworkImage(
+                imageUrl:
+                    '${Constants.baseUrl}/api/users/download/profilePicture/${user!.id}',
+                httpHeaders: {'auth': accessToken},
+                progressIndicatorBuilder:
+                    (context, url, progress) => Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                errorWidget:
+                    (context, url, error) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.person, color: Colors.grey),
+                    ),
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -488,26 +494,29 @@ class CommentsSection extends StatelessWidget {
                         return Column(
                           children: [
                             ListTile(
-                              leading: CachedNetworkImage(
-                                imageUrl:
-                                    '${Constants.baseUrl}/api/users/download/profilePicture/${comment.user!.id}',
-                                httpHeaders: {'auth': accessToken},
-                                progressIndicatorBuilder:
-                                    (context, url, progress) => Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: Padding(
+                              leading: SizedBox(
+                                height: Get.height * 0.03,
+                                child: CachedNetworkImage(
+                                  imageUrl:
+                                      '${Constants.baseUrl}/api/users/download/profilePicture/${comment.user!.id}',
+                                  httpHeaders: {'auth': accessToken},
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                  errorWidget:
+                                      (context, url, error) => Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(),
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.grey,
+                                        ),
                                       ),
-                                    ),
-                                errorWidget:
-                                    (context, url, error) => Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Icon(
-                                        Icons.person,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
+                                ),
                               ),
                               title: Text(
                                 commenterName,
@@ -524,55 +533,58 @@ class CommentsSection extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: controller.commentController.value,
-                        decoration: InputDecoration(
-                          hintText: 'Add a comment...',
-                          filled: true,
-                          border: OutlineInputBorder(
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: controller.commentController.value,
+                          decoration: InputDecoration(
+                            hintText: 'Add a comment...',
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (controller.commentController.value.text
+                              .trim()
+                              .isEmpty) {
+                            Get.snackbar(
+                              'Error',
+                              'Comment cannot be empty',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                              icon: Icon(Icons.error, color: Colors.white),
+                            );
+                            return;
+                          }
+                          Get.back();
+                          await controller.createComment(post.id ?? 0);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (controller.commentController.value.text
-                            .trim()
-                            .isEmpty) {
-                          Get.snackbar(
-                            'Error',
-                            'Comment cannot be empty',
-                            backgroundColor: Colors.red,
-                            colorText: Colors.white,
-                            icon: Icon(Icons.error, color: Colors.white),
-                          );
-                          return;
-                        }
-                        Get.back();
-                        await controller.createComment(post.id ?? 0);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        child: const Text(
+                          'Send',
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      child: const Text(
-                        'Send',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -604,69 +616,108 @@ class AddPostSection extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.post_add),
       onPressed: () {
-        Get.bottomSheet(
-          backgroundColor: Colors.grey.shade800,
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.post_add, color: Colors.blue, size: 80),
+        showModalBottomSheet(
+          showDragHandle: true,
+          enableDrag: true,
+          backgroundColor: Colors.grey.shade900,
+          context: context,
+          builder:
+              (context) => Container(
+                height: Get.height * 0.7,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                TextField(
-                  controller: controller.titleController.value,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller.contentController.value,
-                  decoration: const InputDecoration(
-                    labelText: 'Content',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.post_add, color: Colors.blue, size: 80),
                     ),
-                  ),
-                  onPressed: () async {
-                    if (controller.titleController.value.text.isEmpty ||
-                        controller.contentController.value.text.isEmpty) {
-                      Get.snackbar(
-                        'Error',
-                        'Please fill in all fields',
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                        icon: Icon(Icons.error, color: Colors.white),
-                      );
-                      return;
-                    }
-                    Get.back();
-                    await controller.sendPost();
-                    await controller.getAllPosts();
-                  },
-                  label: const Text(
-                    'Post',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  icon: Icon(Icons.send, color: Colors.white),
+                    TextField(
+                      controller: controller.titleController.value,
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: controller.contentController.value,
+                      decoration: const InputDecoration(
+                        labelText: 'Content',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextButton(
+                        onPressed: () async {
+                          final picker = ImagePicker();
+                          final pickedImage = await picker.pickImage(
+                            source: ImageSource.gallery,
+                          );
+
+                          if (pickedImage != null) {
+                            controller.selectedImage.value = File(
+                              pickedImage.path,
+                            );
+                          }
+                        },
+                        child: Text(
+                          'Add photo',
+                          style: TextStyle(color: Colors.lightBlue),
+                        ),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        if (controller.titleController.value.text.isEmpty ||
+                            controller.contentController.value.text.isEmpty) {
+                          Get.snackbar(
+                            'Error',
+                            'Please fill in all fields',
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                            icon: Icon(Icons.error, color: Colors.white),
+                          );
+                          return;
+                        }
+
+                        Get.back();
+                        final response = await controller.sendPost();
+
+                        if (response != null && response['post'] != null) {
+                          final postId = response['post']['id'];
+                          if (controller.selectedImage.value != null) {
+                            await controller.uploadPostImage(
+                              postId,
+                              controller.selectedImage.value!,
+                            );
+                            controller.selectedImage.value = null;
+                          }
+
+                          await controller.getAllPosts();
+                        }
+                      },
+                      label: const Text(
+                        'Post',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      icon: Icon(Icons.send, color: Colors.white),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
           isScrollControlled: true,
         );
       },
