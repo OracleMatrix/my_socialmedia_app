@@ -57,20 +57,23 @@ class ProfileView extends GetView<ProfileController> {
                 child: Stack(
                   alignment: Alignment.bottomRight,
                   children: [
-                    CachedNetworkImage(
-                      imageUrl:
-                          '${Constants.baseUrl}/api/users/download/profilePicture/$currentUserId',
-                      httpHeaders: {'auth': accessToken},
-                      progressIndicatorBuilder:
-                          (context, url, progress) => Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                      errorWidget:
-                          (context, url, error) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(Icons.person, color: Colors.grey),
-                          ),
+                    CircleAvatar(
+                      radius: 60,
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            '${Constants.baseUrl}/api/users/download/profilePicture/$currentUserId',
+                        httpHeaders: {'auth': accessToken},
+                        progressIndicatorBuilder:
+                            (context, url, progress) => Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                        errorWidget:
+                            (context, url, error) => Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(Icons.person, color: Colors.grey),
+                            ),
+                      ),
                     ),
                     if (userId == currentUserId)
                       GestureDetector(
@@ -403,8 +406,7 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: SizedBox(
-                    height: Get.height * 0.03,
+                  leading: CircleAvatar(
                     child: CachedNetworkImage(
                       imageUrl:
                           '${Constants.baseUrl}/api/users/download/profilePicture/${follower.id}',
@@ -461,8 +463,7 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: SizedBox(
-                    height: Get.height * 0.03,
+                  leading: CircleAvatar(
                     child: CachedNetworkImage(
                       imageUrl:
                           '${Constants.baseUrl}/api/users/download/profilePicture/${followings.id}',
