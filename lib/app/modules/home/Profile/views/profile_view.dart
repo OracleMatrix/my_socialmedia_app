@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:my_socialmedia_app/app/data/Constants/constants.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -19,6 +22,7 @@ class ProfileView extends GetView<ProfileController> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.getUserData(userId);
     });
+    final currentUserId = GetStorage().read(Constants.idKey);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
@@ -48,23 +52,53 @@ class ProfileView extends GetView<ProfileController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 20),
-              CachedNetworkImage(
-                imageUrl:
-                    '${Constants.baseUrl}/api/users/download/profilePicture/${userId}',
-                httpHeaders: {'auth': accessToken},
-                progressIndicatorBuilder:
-                    (context, url, progress) => Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
+              SizedBox(
+                height: Get.height * 0.05,
+                child: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl:
+                          '${Constants.baseUrl}/api/users/download/profilePicture/$currentUserId',
+                      httpHeaders: {'auth': accessToken},
+                      progressIndicatorBuilder:
+                          (context, url, progress) => Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.person, color: Colors.grey),
+                          ),
+                    ),
+                    if (userId == currentUserId)
+                      GestureDetector(
+                        onTap: () async {
+                          final pick = ImagePicker();
+                          final pickedImage = await pick.pickImage(
+                            source: ImageSource.gallery,
+                          );
+                          if (pickedImage != null) {
+                            controller.selectedImage.value = File(
+                              pickedImage.path,
+                            );
+                            await controller.addProfilePhoto(
+                              controller.selectedImage.value!,
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.lightBlue,
+                          ),
+                          child: Icon(Icons.edit, color: Colors.white),
+                        ),
                       ),
-                    ),
-                errorWidget:
-                    (context, url, error) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.person, color: Colors.grey),
-                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 10),
               Text(
@@ -139,7 +173,7 @@ class ProfileView extends GetView<ProfileController> {
                 ),
 
               Divider(),
-              _buildPostsGrid(),
+              _buildPostsGrid(accessToken, currentUserId),
             ],
           ),
         );
@@ -160,7 +194,7 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildPostsGrid() {
+  Widget _buildPostsGrid(String accessToken, int currentUserId) {
     return Obx(() {
       var posts = controller.userData.value.posts ?? [];
       if (posts.isEmpty) {
@@ -185,21 +219,78 @@ class ProfileView extends GetView<ProfileController> {
                 var post = posts[index];
                 return GestureDetector(
                   onTap: () {
-                    _showPostDetail(context, post);
+                    _showPostDetail(context, post, accessToken);
+                  },
+                  onLongPress: () async {
+                    if (post.userId == currentUserId) {
+                      Get.defaultDialog(
+                        contentPadding: EdgeInsets.all(16),
+                        title: 'Delete post',
+                        middleText:
+                            'Are you sure you want to delete this post?',
+                        confirm: MaterialButton(
+                          textColor: Colors.white,
+                          color: Colors.red,
+                          onPressed: () {
+                            Get.back();
+                            controller.deletePost(post.id!);
+                          },
+                          child: Text('YES'),
+                        ),
+                        cancel: MaterialButton(
+                          textColor: Colors.white,
+                          color: Colors.green,
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: Text('NO'),
+                        ),
+                      );
+                    }
                   },
                   child: Container(
                     color: Colors.grey[400],
-                    child: Center(
-                      child: Text(
-                        post.title ?? 'No Title',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: sizingInformation.isDesktop ? 18 : 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    child:
+                        post.postPicture != null
+                            ? SizedBox(
+                              height: Get.height * 0.2,
+                              width: Get.width,
+                              child: CachedNetworkImage(
+                                imageUrl:
+                                    '${Constants.baseUrl}/api/posts/${post.id}/picture',
+                                httpHeaders: {'auth': accessToken},
+                                progressIndicatorBuilder:
+                                    (context, url, progress) => Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    ),
+                                errorWidget:
+                                    (context, url, error) => Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                              ),
+                            )
+                            : Center(
+                              child: Text(
+                                post.title ?? 'No Title',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize:
+                                      sizingInformation.isDesktop ? 18 : 14,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                   ),
                 );
               },
@@ -208,7 +299,7 @@ class ProfileView extends GetView<ProfileController> {
     });
   }
 
-  void _showPostDetail(BuildContext context, post) {
+  void _showPostDetail(BuildContext context, post, accessToken) {
     showDialog(
       context: context,
       builder: (context) {
@@ -225,6 +316,28 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ),
                 Divider(),
+                if (post.postPicture != null)
+                  SizedBox(
+                    height: Get.height * 0.15,
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          '${Constants.baseUrl}/api/posts/${post.id}/picture',
+                      httpHeaders: {'auth': accessToken},
+                      progressIndicatorBuilder:
+                          (context, url, progress) => Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.broken_image, color: Colors.grey),
+                          ),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
@@ -290,23 +403,23 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CachedNetworkImage(
-                    imageUrl:
-                        '${Constants.baseUrl}/api/users/download/profilePicture/${follower.id}',
-                    httpHeaders: {'auth': accessToken},
-                    progressIndicatorBuilder:
-                        (context, url, progress) => Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                  leading: SizedBox(
+                    height: Get.height * 0.03,
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          '${Constants.baseUrl}/api/users/download/profilePicture/${follower.id}',
+                      httpHeaders: {'auth': accessToken},
+                      progressIndicatorBuilder:
+                          (context, url, progress) => Padding(
+                            padding: const EdgeInsets.all(2.0),
                             child: CircularProgressIndicator(),
                           ),
-                        ),
-                    errorWidget:
-                        (context, url, error) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(Icons.person, color: Colors.grey),
-                        ),
+                      errorWidget:
+                          (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.person, color: Colors.grey),
+                          ),
+                    ),
                   ),
                   title: Text(follower.following?.name ?? 'No Name'),
                   subtitle: Text(follower.following?.email ?? 'No Email'),
@@ -348,23 +461,23 @@ class ProfileView extends GetView<ProfileController> {
             return Column(
               children: [
                 ListTile(
-                  leading: CachedNetworkImage(
-                    imageUrl:
-                        '${Constants.baseUrl}/api/users/download/profilePicture/${followings.id}',
-                    httpHeaders: {'auth': accessToken},
-                    progressIndicatorBuilder:
-                        (context, url, progress) => Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                  leading: SizedBox(
+                    height: Get.height * 0.03,
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          '${Constants.baseUrl}/api/users/download/profilePicture/${followings.id}',
+                      httpHeaders: {'auth': accessToken},
+                      progressIndicatorBuilder:
+                          (context, url, progress) => Padding(
+                            padding: const EdgeInsets.all(2.0),
                             child: CircularProgressIndicator(),
                           ),
-                        ),
-                    errorWidget:
-                        (context, url, error) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(Icons.person, color: Colors.grey),
-                        ),
+                      errorWidget:
+                          (context, url, error) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.person, color: Colors.grey),
+                          ),
+                    ),
                   ),
                   title: Text(followings.follower?.name ?? 'No Name'),
                   subtitle: Text(followings.follower?.email ?? 'No Email'),
