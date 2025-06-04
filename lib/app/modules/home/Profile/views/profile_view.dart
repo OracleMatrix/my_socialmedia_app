@@ -40,12 +40,13 @@ class ProfileView extends GetView<ProfileController> {
           );
         }
         controller.isFollowing.value =
-            controller.userData.value.following!
-                .map((e) => e.followerId)
+            controller.userData.value.following
+                ?.map((e) => e.followerId)
                 .where(
                   (element) => element == GetStorage().read(Constants.idKey),
                 )
-                .isNotEmpty;
+                .isNotEmpty ??
+            false;
         final currentUserId = GetStorage().read(Constants.idKey);
         return SingleChildScrollView(
           child: Column(
