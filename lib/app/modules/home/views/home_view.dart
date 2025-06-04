@@ -703,8 +703,6 @@ class AddPostSection extends StatelessWidget {
                             );
                             controller.selectedImage.value = null;
                           }
-
-                          await controller.getAllPosts();
                         }
                       },
                       label: const Text(
